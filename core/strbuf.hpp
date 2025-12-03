@@ -4,10 +4,6 @@
 #include "types.hpp"
 
 class Strbuf {
-private:
-  char *data;
-  u32 len;
-  u32 cap;
 
 public:
   Strbuf();
@@ -23,6 +19,10 @@ public:
   void replace(const char *what, const char *s);
   u32 getlen();
   char *getdata();
+private:
+  char *data;
+  u32 len;
+  u32 cap;
 };
 
 #endif //CPPLIG_CORE_STRBUF_HPP

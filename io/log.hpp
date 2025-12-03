@@ -10,13 +10,13 @@
 #include "../core/strbuf.hpp"
 
 
-namespace log {
+namespace Log {
 
-#define trace(...) write_level(log::TRACE, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
-#define info(...) write_level(log::INFO, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
-#define debug(...) write_level(log::DEBUG, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
-#define error(...) write_level(log::ERROR, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
-#define fatal(...) write_level(log::FATAL, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define trace(...) write_level(Log::TRACE, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define info(...) write_level(Log::INFO, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define debug(...) write_level(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define error(...) write_level(Log::ERROR, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define fatal(...) write_level(Log::FATAL, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 
   enum LoggerLevel{
     TRACE, INFO, DEBUG, ERROR, FATAL
@@ -41,7 +41,8 @@ namespace log {
     ~Logger();
   };
   void write_level(LoggerLevel level, const char *file, const char *func, int line, const char *fmt, ...);
-  void setLoggerConfig(LoggerConfig conf);
+  //if  @type == LOGGER_FILE, set in args file_name
+  void setLoggerConfig(LoggerConfig conf, LoggerType type, ...);
 }
 
 #endif //CPPLIB_IO_LOG_HPP

@@ -1,7 +1,7 @@
 #include "log.hpp"
 
 
-namespace log {
+namespace Log {
 
 //time [log_type] file func line message
 #define LOG_MSG "%s: [%s] %s %s:%d -> %s\n"
@@ -9,15 +9,35 @@ namespace log {
   LoggerConfig default_config = {.file = true, .func = true, .line = true, .time = true};
   Logger::Logger() {
     log_type = LOGGER_STDERR;
-    fd = STDERR_FILENO;
+    fd = -1;
     file_name = NULL;
     config = default_config;
 
   }
+  Logger::~Logger() {
+    if (this->log_type == LOGGER_FILE || this->log_type == LOGGER_SOCKET) {
+      close(this->fd);
+    }
+    if (this->file_name != null) {
+      delete [] this->file_name;
+    }
+  }
+
   Logger default_logger;
 
-  void setLoggerConfig(LoggerConfig conf) {
+  void setLoggerConfig(LoggerConfig conf, LoggerType type, ...) {
     default_config = conf;
+    default_logger.log_type = type;
+    if (type == LOGGER_FILE) {
+      va_list li;
+      va_start(li, type);
+
+      char *file_name = va_arg(li, char *);
+      i32 file_name_len = strlen(file_name);
+      default_logger.file_name = new char [file_name_len + 1];
+      strcpy(default_logger.file_name, file_name);
+
+    }
   }
 
   static char *prepareMessage(LoggerLevel level, const char *file, const char *func, i32 line, char *msg) {
@@ -28,7 +48,7 @@ namespace log {
       char buf[512]{0};
       strftime(buf, 512, "%Y-%m-%d : %H-%M-%S", t);
       sb << (const char *)buf;
-      sb << (const char *)" : ";
+      sb << (const char *)" ";
     }
     switch(level) {
       case TRACE: {
@@ -62,6 +82,7 @@ namespace log {
     }
     sb << (const char *)" -> ";
     sb << (const char *)msg;
+    sb << "\n";
     char *res = sb.toString();
     return res;
   }
@@ -85,7 +106,12 @@ namespace log {
           fprintf(stderr, "Logger error while write into file msg: %s\n", msg);
         }
       } else {
-        i32 fd = open(default_logger.file_name, O_CREAT | O_WRONLY, S_IWUSR | S_IRUSR | S_IWGRP | S_IRGRP);
+        i32 fd;
+        if (access(default_logger.file_name, F_OK) == 0) {
+          fd = open(default_logger.file_name, O_APPEND | O_WRONLY, S_IWUSR | S_IRUSR | S_IWGRP | S_IRGRP);
+        } else {
+          fd = open(default_logger.file_name, O_CREAT | O_WRONLY, S_IWUSR | S_IRUSR | S_IWGRP | S_IRGRP);
+        }
         if (fd <= 0) {
           fprintf(stderr, "Logger error while open file %s\n", default_logger.file_name);
           return;
